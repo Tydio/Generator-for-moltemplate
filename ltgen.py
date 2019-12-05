@@ -28,7 +28,7 @@ cml_fh.readline()
 cml_fh.readline()
 
 # write the headlines of *.lt file
-lt_fh.writelines(["import oplsaa.lt\n", "\n", "%s inherits OPLSAA {\n" % file_name, "\n", "    # atom-id mol-id atom-type charge X Y Z # comments\n", "   write(\"Data Atoms\") {\n"])
+lt_fh.writelines(["import oplsaa.lt\n", "\n", "%s inherits OPLSAA {\n" % head_name, "\n", "    # atom-id mol-id atom-type charge X Y Z # comments\n", "   write(\"Data Atoms\") {\n"])
 
 # write the atom list of *.lt file
 elems = []
