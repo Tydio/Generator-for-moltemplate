@@ -36,7 +36,7 @@ atom_ids = []
 while True:
     line = cml_fh.readline()
     if "atom id" in line:
-        p = re.search(r'^\s*\<atom id="a(\d+)"\s+elementType="([A-Za-z]+)"\s+x3="(-*[0-9\.]+)"\s+y3="(-*[0-9\.]+)"\s+z3="(-*[0-9\.]+)".*$', line)
+        p = re.search(r'^\s*\<atom id="a(\d+)"\s+elementType="([A-Za-z]+)"\s+.*x3="(-*[0-9\.]+)"\s+y3="(-*[0-9\.]+)"\s+z3="(-*[0-9\.]+)".*$', line)
         atom_id = int(p.group(1))
         atom_ids.append(atom_id)
         elem = p.group(2)
