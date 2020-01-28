@@ -18,7 +18,7 @@ if __name__ == '__main__':
     for file_name in args.file_names:
         # open a *.lt file to write for moltemplate
         main_name = file_name.split('.')[0] # extract the main name of the file.
-        mol = ET.parse(file_name).getroot() # parse the *.cml file.
+        mol = ET.parse(file_name).getroot() # parse the *.cml file using xml parser.
         with open('%s.lt' % main_name, 'w') as lt_fh:
             lt_fh.writelines(["import %s.lt\n" % args.forcefield, "\n", "%s inherits %s {\n" % (main_name, args.forcefield.upper()), "\n", "    # atom-id mol-id atom-type charge X Y Z # comments\n", "   write(\"Data Atoms\") {\n"])  # write the headlines of *.lt file
 
