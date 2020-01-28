@@ -25,7 +25,7 @@ if __name__ == '__main__':
             # write the atom list of the *.lt file
             for atom in mol[0]:
                 lt_fh.write('        $atom:%s  $mol:...  @atom:  0.00  %s  %s  %s  # %s\n' % (atom.attrib['id'], atom.attrib['x3'], atom.attrib['y3'], atom.attrib['z3'], atom.attrib['elementType']))
-            lt_fh.writelines(["    }\n", "\n", "    # bond-id atom-id1 atom-id2\n", "    write(\"Data Bond List\") {\n"])
+            lt_fh.writelines(["    }\n", "\n", "    # bond-id atom-id1 atom-id2 # comments\n", "    write(\"Data Bond List\") {\n"])
 
             # write the bond list of the *.lt file
             for i, bond in enumerate(mol[1]):
