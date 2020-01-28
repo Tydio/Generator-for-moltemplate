@@ -31,5 +31,5 @@ if __name__ == '__main__':
             # write the bond list of the *.lt file
             for i, bond in enumerate(mol[1]):
                 bond_atom_indices = bond.attrib['atomRefs2'].split(' ')
-                lt_fh.write('        $bond:b%d  $atom:%s  $atom:%s\n' % (i, bond_atom_indices[0], bond_atom_indices[1]))
+                lt_fh.write('        $bond:b%d  $atom:%s  $atom:%s  # order:%s\n' % (i, bond_atom_indices[0], bond_atom_indices[1], bond.attrib['order']))
             lt_fh.writelines(["    }\n", "}\n"])
