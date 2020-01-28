@@ -4,16 +4,7 @@
 import os
 import re
 import argparse
-
-def parseLine1(line):
-    global elems
-    p = re.search(r'^\s*\<atom id="a(\d+)"\s+elementType="([A-Za-z]+)".*x3="(-?[0-9\.]+)"\s+y3="(-?[0-9\.]+)"\s+z3="(-?[0-9\.]+)".*$', line)
-    elems.update({int(p.group(1)):p.group(2)})
-    return int(p.group(1)), p.group(2), float(p.group(3)), float(p.group(4)), float(p.group(5))
-
-def parseLine2(line):
-    p = re.search(r'^\s*\<bond atomRefs2="a(\d+)\s+a(\d+)".*$', line)
-    return int(p.group(1)), int(p.group(2))
+import xml.etree.ElementTree as ET
 
 if __name__ == '__main__':
     # accept the file name from the shell
@@ -26,33 +17,19 @@ if __name__ == '__main__':
 
     # read the *.cml file from avogadro
     for file_name in args.file_names:
-        with open(file_name, 'r') as cml_fh:
-            # open a *.lt file to write for moltemplate
-            main_name = file_name.split('.')[0] # extract the main name of the file.
-            with open('%s.lt' % main_name, 'w') as lt_fh:
-                cml_fh.readline()   # skip two headlines <molecule> and <atomArray>
-                cml_fh.readline()
+        # open a *.lt file to write for moltemplate
+        main_name = file_name.split('.')[0] # extract the main name of the file.
+        mol = ET.parse(file_name).getroot()
+        with open('%s.lt' % main_name, 'w') as lt_fh:
+            lt_fh.writelines(["import %s.lt\n" % args.forcefield, "\n", "%s inherits %s {\n" % (main_name, args.forcefield.upper()), "\n", "    # atom-id mol-id atom-type charge X Y Z # comments\n", "   write(\"Data Atoms\") {\n"])  # write the headlines of *.lt file
 
-                lt_fh.writelines(["import %s.lt\n" % args.forcefield, "\n", "%s inherits %s {\n" % (main_name, args.forcefield.upper()), "\n", "    # atom-id mol-id atom-type charge X Y Z # comments\n", "   write(\"Data Atoms\") {\n"])  # write the headlines of *.lt file
+            # write the atom list of the *.lt file
+            for atom in mol[0]:
+                lt_fh.write('        $atom:%s  $mol:...  @atom:  0.00  %s  %s  %s  # %s\n' % (atom.attrib['id'], atom.attrib['x3'], atom.attrib['y3'], atom.attrib['z3'], atom.attrib['elementType']))
+            lt_fh.writelines(["    }\n", "\n", "    # bond-id atom-id1 atom-id2\n", "    write(\"Data Bond List\") {\n"])
 
-                # write the atom list of the *.lt file
-                elems = {}  # define a dictionary to store the index-name relationship of each atom.
-                while True:
-                    line = cml_fh.readline()
-                    if "atom id" in line:
-                        atom_id, elem, pos_x, pos_y, pos_z = parseLine1(line)
-                        lt_fh.write("        $atom:%s%d  $mol:...  @atom:  0.00  %12.5f  %12.5f  %12.5f  #\n" % (elem, atom_id, pos_x, pos_y, pos_z))
-                    else:
-                        break
-                lt_fh.writelines(["    }\n", "\n", "    # bond-id atom-id1 atom-id2\n", "    write(\"Data Bond List\") {\n"])
-
-                # write the bond list of the *.lt file
-                cml_fh.readline()   # skip the line: <bondArray>
-                while True:
-                    line = cml_fh.readline()
-                    if "bond atomRefs2" in line:
-                        atom_id1, atom_id2 = parseLine2(line)
-                        lt_fh.write("        $bond:%s%d%s%d  $atom:%s%d  $atom:%s%d\n" % (elems[atom_id1], atom_id1, elems[atom_id2], atom_id2, elems[atom_id1], atom_id1, elems[atom_id2], atom_id2))
-                    else:
-                        break
-                lt_fh.writelines(["    }\n", "}\n"])
+            # write the bond list of the *.lt file
+            for i, bond in enumerate(mol[1]):
+                bond_atom_indices = bond.attrib['atomRefs2'].split(' ')
+                lt_fh.write('        $bond:b%d  $atom:%s  $atom:%s\n' % (i, bond_atom_indices[0], bond_atom_indices[1]))
+            lt_fh.writelines(["    }\n", "}\n"])
